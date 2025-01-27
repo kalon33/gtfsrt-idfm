@@ -4,6 +4,9 @@ import GtfsRealtime from "gtfs-realtime-bindings";
 import { Hono } from "hono";
 
 import { fetchData } from "./fetch-data.js";
+import { parseExtensions } from "./parse-extensions.js";
+
+const stifToGtfsId = await parseExtensions();
 
 async function generateTripUpdate() {
 	const data = await fetchData();
@@ -19,40 +22,47 @@ async function generateTripUpdate() {
 			incrementality:
 				GtfsRealtime.transit_realtime.FeedHeader.Incrementality.FULL_DATASET,
 		},
-		entity: frame?.EstimatedVehicleJourney.map((EstimatedVehicleJourney) => {
-			const tripId = `IDFM:TN:SNCF:${EstimatedVehicleJourney.DatedVehicleJourneyRef.value.split(":")[3]}`;
-			return {
-				id: `SM:${tripId}`,
-				tripUpdate: {
-					stopTimeUpdate:
-						EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.map(
-							({
-								StopPointRef,
-								ExpectedArrivalTime,
-								ExpectedDepartureTime,
-							}) => ({
-								arrival: ExpectedArrivalTime
-									? { time: dayjs(ExpectedArrivalTime).unix() }
-									: undefined,
-								departure: ExpectedDepartureTime
-									? { time: dayjs(ExpectedDepartureTime).unix() }
-									: undefined,
-								stopId: `IDFM:${StopPointRef.value.split(":")[3]}`,
-								scheduleRelationship:
-									GtfsRealtime.transit_realtime.TripUpdate.StopTimeUpdate
-										.ScheduleRelationship.SCHEDULED,
-							}),
-						),
-					timestamp: dayjs(EstimatedVehicleJourney.RecordedAtTime).unix(),
-					trip: {
-						tripId,
-						scheduleRelationship:
-							GtfsRealtime.transit_realtime.TripDescriptor.ScheduleRelationship
-								.SCHEDULED,
+		entity: frame?.EstimatedVehicleJourney.flatMap(
+			(EstimatedVehicleJourney) => {
+				if (
+					!EstimatedVehicleJourney.DatedVehicleJourneyRef.value.includes("SNCF")
+				)
+					return [];
+
+				const tripId = `IDFM:TN:SNCF:${EstimatedVehicleJourney.DatedVehicleJourneyRef.value.split(":")[3]}`;
+				return {
+					id: `SM:${tripId}`,
+					tripUpdate: {
+						stopTimeUpdate:
+							EstimatedVehicleJourney.EstimatedCalls.EstimatedCall.map(
+								({
+									StopPointRef,
+									ExpectedArrivalTime,
+									ExpectedDepartureTime,
+								}) => ({
+									arrival: ExpectedArrivalTime
+										? { time: dayjs(ExpectedArrivalTime).unix() }
+										: undefined,
+									departure: ExpectedDepartureTime
+										? { time: dayjs(ExpectedDepartureTime).unix() }
+										: undefined,
+									stopId: stifToGtfsId.get(StopPointRef.value.split(":")[3]),
+									scheduleRelationship:
+										GtfsRealtime.transit_realtime.TripUpdate.StopTimeUpdate
+											.ScheduleRelationship.SCHEDULED,
+								}),
+							),
+						timestamp: dayjs(EstimatedVehicleJourney.RecordedAtTime).unix(),
+						trip: {
+							tripId,
+							scheduleRelationship:
+								GtfsRealtime.transit_realtime.TripDescriptor
+									.ScheduleRelationship.SCHEDULED,
+						},
 					},
-				},
-			};
-		}),
+				};
+			},
+		),
 	};
 }
 
