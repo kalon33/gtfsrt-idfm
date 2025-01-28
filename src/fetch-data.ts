@@ -6,16 +6,16 @@ if (typeof process.env.API_TOKEN === "undefined") {
 }
 
 let cache: SiriLiteResponse;
+let lastFetch: dayjs.Dayjs;
 
 const isCacheFresh = () => {
-	if (typeof cache === "undefined") return false;
-	return (
-		dayjs().diff(cache.Siri.ServiceDelivery.ResponseTimestamp, "seconds") < 60
-	);
+	if (typeof lastFetch === "undefined") return false;
+	return dayjs().diff(lastFetch, "seconds") < 120;
 };
 
 export async function fetchData() {
 	if (isCacheFresh()) return cache;
+	lastFetch = dayjs();
 
 	const response = await fetch(
 		"https://prim.iledefrance-mobilites.fr/marketplace/estimated-timetable",

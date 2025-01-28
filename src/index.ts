@@ -39,17 +39,28 @@ async function generateTripUpdate() {
 									StopPointRef,
 									ExpectedArrivalTime,
 									ExpectedDepartureTime,
+									DepartureStatus,
+									ArrivalStatus,
 								}) => ({
-									arrival: ExpectedArrivalTime
-										? { time: dayjs(ExpectedArrivalTime).unix() }
-										: undefined,
-									departure: ExpectedDepartureTime
-										? { time: dayjs(ExpectedDepartureTime).unix() }
-										: undefined,
+									...(ArrivalStatus !== "CANCELLED" &&
+									DepartureStatus !== "CANCELLED"
+										? {
+												arrival: ExpectedArrivalTime
+													? { time: dayjs(ExpectedArrivalTime).unix() }
+													: undefined,
+												departure: ExpectedDepartureTime
+													? { time: dayjs(ExpectedDepartureTime).unix() }
+													: undefined,
+												scheduleRelationship:
+													GtfsRealtime.transit_realtime.TripUpdate
+														.StopTimeUpdate.ScheduleRelationship.SCHEDULED,
+											}
+										: {
+												scheduleRelationship:
+													GtfsRealtime.transit_realtime.TripUpdate
+														.StopTimeUpdate.ScheduleRelationship.SKIPPED,
+											}),
 									stopId: stifToGtfsId.get(StopPointRef.value.split(":")[3]),
-									scheduleRelationship:
-										GtfsRealtime.transit_realtime.TripUpdate.StopTimeUpdate
-											.ScheduleRelationship.SCHEDULED,
 								}),
 							),
 						timestamp: dayjs(EstimatedVehicleJourney.RecordedAtTime).unix(),
