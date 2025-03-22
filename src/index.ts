@@ -64,7 +64,9 @@ async function generateTripUpdate() {
 									stopId: stifToGtfsId.get(StopPointRef.value.split(":")[3]),
 									stopTimeProperties: {
 										// is not actually a stop id but a quay name
-										assignedStopId: ArrivalPlatformName?.value,
+										assignedStopId: ArrivalPlatformName?.value
+											? `VOIE ${ArrivalPlatformName.value}`
+											: undefined,
 									},
 								}),
 							),
