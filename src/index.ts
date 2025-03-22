@@ -41,6 +41,7 @@ async function generateTripUpdate() {
 									ExpectedDepartureTime,
 									DepartureStatus,
 									ArrivalStatus,
+									ArrivalPlatformName,
 								}) => ({
 									...(ArrivalStatus !== "CANCELLED" &&
 									DepartureStatus !== "CANCELLED"
@@ -61,6 +62,10 @@ async function generateTripUpdate() {
 														.StopTimeUpdate.ScheduleRelationship.SKIPPED,
 											}),
 									stopId: stifToGtfsId.get(StopPointRef.value.split(":")[3]),
+									stopTimeProperties: {
+										// is not actually a stop id but a quay name
+										assignedStopId: ArrivalPlatformName?.value,
+									},
 								}),
 							),
 						timestamp: dayjs(EstimatedVehicleJourney.RecordedAtTime).unix(),

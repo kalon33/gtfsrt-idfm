@@ -44,4 +44,7 @@ export type EstimatedCall = {
 	ExpectedDepartureTime: string;
 	DepartureStatus?: "CANCELLED";
 	ArrivalStatus?: "CANCELLED";
+	ArrivalPlatformName?: {
+		value: string;
+	};
 };
