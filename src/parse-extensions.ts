@@ -5,7 +5,12 @@ export async function parseExtensions() {
 	await readCsv<{ object_id: string; object_code: string }>(
 		"./data/stop_extensions.txt",
 		(record) => {
-			stifToGtfsId.set(record.object_code, record.object_id);
+			stifToGtfsId.set(
+				record.object_code.startsWith("monomodalStopPlace:")
+					? record.object_code.slice("monomodalStopPlace:".length)
+					: record.object_code,
+				record.object_id,
+			);
 		},
 	);
 	return stifToGtfsId;
