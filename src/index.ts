@@ -65,7 +65,7 @@ async function generateTripUpdate() {
 									stopTimeProperties: {
 										// is not actually a stop id but a quay name
 										assignedStopId: ArrivalPlatformName?.value
-											? `VOIE ${ArrivalPlatformName.value}`
+											? `Voie ${ArrivalPlatformName.value}`
 											: undefined,
 									},
 								}),
