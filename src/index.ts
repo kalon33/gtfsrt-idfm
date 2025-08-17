@@ -47,10 +47,13 @@ async function generateTripUpdate() {
 											GtfsRealtime.transit_realtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SKIPPED,
 									}),
 							stopId: stifToGtfsId.get(StopPointRef.value.split(":")[3]),
-							stopTimeProperties: {
-								// is not actually a stop id but a quay name
-								assignedStopId: ArrivalPlatformName?.value ? `Voie ${ArrivalPlatformName.value}` : undefined,
-							},
+							stopTimeProperties:
+								typeof ArrivalPlatformName?.value === "string" && ArrivalPlatformName?.value !== "unknown"
+									? {
+											// is not actually a stop id but a quay name
+											assignedStopId: ArrivalPlatformName?.value ? `Voie ${ArrivalPlatformName.value}` : undefined,
+										}
+									: undefined,
 						}),
 					),
 					timestamp: dayjs(EstimatedVehicleJourney.RecordedAtTime).unix(),

@@ -1,0 +1,10 @@
+services:
+  producer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: gtfsrt-idfm
+    env_file: .env
+    ports:
+      - "127.0.0.1:50006:3000"
+    restart: unless-stopped
