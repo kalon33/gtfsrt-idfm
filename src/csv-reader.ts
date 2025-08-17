@@ -1,10 +1,7 @@
 import { createReadStream } from "node:fs";
 import Papa from "papaparse";
 
-export type CsvRecord<
-	RequiredKeys extends string = never,
-	OptionalKeys extends string = never,
-> = {
+export type CsvRecord<RequiredKeys extends string = never, OptionalKeys extends string = never> = {
 	[key in RequiredKeys]: string;
 } & { [key in OptionalKeys]?: string };
 
